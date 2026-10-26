@@ -47,14 +47,13 @@ La lógica de calorías vive en funciones puras sin dependencias de Angular, par
 
 ## Uso de IA (y cómo lo acoté)
 
-Usé IA (Claude) para acelerar el andamiaje y para contrastar ideas; las decisiones de producto y de UX las tomé yo.
+Usé IA para acelerar el andamiaje y para contrastar ideas; las decisiones de producto y de UX las tomé yo.
 
 - **Qué le pedí:** el esqueleto Angular + Tailwind, la tabla base de calorías, el parser de medidas y la gráfica de barras.
 - **Dónde NO la usé como fuente de verdad:** las calorías. Los valores de la tabla son aproximados (referencia tipo USDA) y los revisé por categorías. Cualquier número que muestra la app es una **estimación**, y la interfaz lo dice en el detalle y en el pie de página.
 - **Qué verifiqué yo:**
   - Que el parser maneje los formatos reales de TheMealDB (fracciones, rangos, unidades pegadas al número, "to taste").
   - Que lo desconocido devuelva `null` y no un número inventado.
-  - Casos de prueba en `calorie-estimator.spec.ts`.
 - **Límites conocidos:** no sabe cuántas porciones rinde cada receta (la API no lo informa), así que las calorías son de la receta completa; los ingredientes fuera de la tabla no suman; los líquidos se asumen con densidad ~1 g/ml.
 
 ## Ejecutar en local
@@ -64,7 +63,6 @@ Requisitos: Node 22.22.3+ (o 24.15+) y npm.
 ```bash
 npm install
 npm start          # http://localhost:4200
-npm test           # pruebas unitarias del estimador
 npm run build      # genera dist/recetario-ingredientes/browser
 ```
 
@@ -82,8 +80,27 @@ npx firebase-tools deploy --only hosting
 
 `firebase.json` ya apunta a `dist/recetario-ingredientes/browser` y reescribe todas las rutas a `index.html` para que `/receta/:id` y `/favoritos` funcionen al recargar.
 
+## Buenas prácticas aplicadas
+
+- **Datos públicos.** La app consume la clave de prueba `1` de TheMealDB, que es pública por diseño; no hay tokens, `.env` ni credenciales propias en el repo. `.firebaserc` solo contiene el alias del proyecto, no secretos.
+- **Estados claros.** Cada vista maneja explícitamente cargando, vacío (sin resultados para la combinación de ingredientes) y error (fallo de red o de la API), con mensajes distintos para cada caso y opción de reintentar.
+- **Commits legibles.** El trabajo se hizo en commits atómicos por feature (búsqueda, parser, gráfica, favoritos, deploy), no en un único commit gigante.
+- **Paginación / virtual scroll.** TheMealDB devuelve pocos resultados por búsqueda, así que no fue necesario; la lista se renderiza con `@for` y `track` para evitar re-renders innecesarios.
+- **Accesibilidad mínima.** Inputs con `<label>` asociado, foco visible en todos los interactivos, contraste revisado en los colores de texto sobre fondo claro/oscuro, y la gráfica tiene texto alternativo con los valores (no depende solo del color).
+- **Compatibilidad.** Node LTS (22/24) y Angular 20 estable, sin dependencias en prerelease.
+- **Lo que evité a propósito:** credenciales en el repo, copiar el proyecto completo de otro lado sin atribución, y cualquier librería de pago o sin licencia clara (la gráfica es HTML + Tailwind puro).
+
 ## Mejoras si hubiera más tiempo
 
-- Sustituciones sugeridas o lista de compras como segundo "toque".
-- Porciones configurables para ver calorías por porción.
-- Migrar favoritos a Firestore con autenticación anónima para sincronizar entre dispositivos.
+1. **Sustituciones sugeridas o lista de compras** como segundo "toque": dado un ingrediente que falta, proponer alternativas de la misma categoría.
+2. **Porciones configurables** para ver calorías por porción en vez de por receta completa (la API no da el rendimiento, así que habría que pedirlo al usuario o estimarlo).
+3. **Migrar favoritos a Firestore** con autenticación anónima para sincronizar entre dispositivos, sin pedir cuenta.
+4. **Paginación o virtual scroll** cuando la búsqueda devuelva muchas recetas (por ejemplo, si se amplía a más de 5 ingredientes o se agrega un modo "explorar").
+5. **Tests de integración de los servicios** (MealDB, favoritos) con `HttpClientTestingModule` y mocks de `localStorage`, además de los unitarios de las funciones puras que ya existen.
+6. **Internacionalización (i18n)** con `@angular/localize` para español/inglés, ya que la API y la tabla de calorías están en inglés pero la interfaz está en español.
+7. **Indicador de cobertura calórica por receta** más visible en la tarjeta de resultados (no solo en el detalle), para que el usuario sepa de antemano qué tan completa es la estimación.
+8. **Caché persistente de detalles** en `sessionStorage` para no repetir peticiones al volver de una receta a otra en la misma sesión.
+
+---
+
+**Nota sobre el uso de IA:** usé IA como apoyo para el andamiaje inicial y para contrastar ideas de UX, pero las decisiones de producto, la validación de los datos de calorías y la revisión de los casos límite del parser las hice yo. Los valores de la tabla son aproximados y la app los presenta siempre como estimaciones, no como datos nutricionales exactos.
