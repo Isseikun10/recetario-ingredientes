@@ -2,7 +2,7 @@
 
 Aplicación web en **Angular 20** desplegada en **Firebase Hosting**. Ingresas de 2 a 5 ingredientes y la app lista recetas que los usan, con una **estimación calórica básica**, el detalle con pasos y una **gráfica de barras de calorías por ingrediente**. Las recetas favoritas se guardan en **localStorage**.
 
-- URL pública: _pendiente de publicar_ (`https://TU-PROJECT-ID.web.app`)
+- URL pública: _pendiente de publicar_ (`https://recetario-ingredientes.web.app/`)
 - Datos: [TheMealDB](https://www.themealdb.com/api.php) (API gratuita, clave de prueba `1`)
 
 ## Decisiones de diseño
