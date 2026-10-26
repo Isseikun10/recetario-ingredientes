@@ -128,11 +128,12 @@ export class SearchStateService {
       for (const meal of list) {
         const entry = byId.get(meal.id) ?? {
           ...meal,
-          matches: [],
+          matches: [] as readonly string[],
           detail: 'loading' as const,
         };
-        if (!entry.matches.includes(term)) entry.matches.push(term);
-        byId.set(meal.id, entry);
+        if (!entry.matches.includes(term)) {
+          byId.set(meal.id, { ...entry, matches: [...entry.matches, term] });
+        }
       }
     });
 
