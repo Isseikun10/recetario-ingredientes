@@ -13,41 +13,35 @@ const MIN_BAR_PERCENT = 3;
 interface Bar {
   name: string;
   kcal: number;
-  /** Ancho relativo (0–100) respecto al ingrediente con más kcal. */
-  percent: number;
-  /** Porcentaje del total de la receta que aporta este ingrediente. */
-  share: number;
+  percent: number; // ancho respecto al ingrediente que más aporta
+  share: number; // % del total de la receta
 }
 
-/**
- * "Mi toque": gráfica de barras de calorías por ingrediente, hecha solo con
- * HTML y Tailwind (sin librerías de gráficas). Cada barra tiene su valor en
- * texto, así que no depende del color.
- */
+// Gráfica de barras hecha solo con HTML y Tailwind, sin librerías.
+// Cada barra lleva su valor en texto para no depender del color.
 @Component({
   selector: 'app-calorie-chart',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <figure>
-      <figcaption class="mb-3 text-sm font-medium text-stone-700">
-        Calorías por ingrediente (estimado, receta completa)
+      <figcaption class="mb-3 text-sm font-semibold text-slate-800">
+        Calorías por ingrediente
+        <span class="font-normal text-slate-500">(estimado, receta completa)</span>
       </figcaption>
 
       @if (bars().length === 0) {
-        <p class="text-sm text-stone-500">
+        <p class="text-sm text-slate-500">
           No hay datos suficientes para graficar esta receta.
         </p>
       } @else {
-        <ul class="space-y-2" aria-label="Calorías por ingrediente">
+        <ul class="list-none space-y-2.5 p-0" aria-label="Calorías por ingrediente">
           @for (bar of bars(); track bar.name) {
-            <li
-              class="grid grid-cols-[8rem_1fr_4.5rem] items-center gap-2 text-sm"
-            >
-              <span class="truncate capitalize" [title]="bar.name">
+            <li class="grid grid-cols-[6.5rem_1fr_6.5rem] items-center gap-3 text-sm">
+              <span class="truncate capitalize text-slate-700" [title]="bar.name">
                 {{ bar.name }}
               </span>
               <span
-                class="relative h-3 rounded-full bg-stone-100"
+                class="h-2 overflow-hidden rounded-full bg-slate-100"
                 role="meter"
                 aria-valuemin="0"
                 aria-valuemax="100"
@@ -56,27 +50,28 @@ interface Bar {
                 [attr.aria-label]="bar.name"
               >
                 <span
-                  class="block h-3 rounded-full bg-amber-500"
+                  class="block h-2 rounded-full bg-blue-600"
                   [style.width.%]="bar.percent"
                 ></span>
               </span>
-              <span class="text-right tabular-nums text-stone-600">
+              <span class="text-right tabular-nums text-slate-600">
                 {{ bar.kcal }} kcal
+                <span class="text-xs text-slate-400">{{ bar.share }}%</span>
               </span>
             </li>
           }
         </ul>
 
         @if (hidden() > 0) {
-          <p class="mt-2 text-xs text-stone-500">
-            + {{ hidden() }}
-            {{ hidden() === 1 ? 'ingrediente' : 'ingredientes' }}
-            con aporte menor no se {{ hidden() === 1 ? 'muestra' : 'muestran' }}.
+          <p class="mt-3 text-xs text-slate-500">
+            Hay {{ hidden() }}
+            {{ hidden() === 1 ? 'ingrediente más' : 'ingredientes más' }}
+            con un aporte menor que no {{ hidden() === 1 ? 'se muestra' : 'se muestran' }}.
           </p>
         }
 
-        <p class="mt-3 text-xs text-stone-500">
-          Total estimado: <span class="font-medium tabular-nums">{{ total() }} kcal</span>
+        <p class="mt-3 text-xs text-slate-500">
+          Total estimado: <span class="font-semibold tabular-nums text-slate-800">{{ total() }} kcal</span>
         </p>
       }
     </figure>
@@ -85,7 +80,7 @@ interface Bar {
 export class CalorieChart {
   readonly items = input.required<readonly IngredientCalories[]>();
 
-  /** Ingredientes con kcal > 0, ordenados de mayor a menor aporte. */
+  // Solo los que tienen kcal, de mayor a menor
   private readonly withKcal = computed(() =>
     this.items()
       .filter(
@@ -95,7 +90,7 @@ export class CalorieChart {
       .sort((a, b) => b.kcal - a.kcal),
   );
 
-  /** Suma de kcal de todos los ingredientes estimados (no solo los visibles). */
+  // Suma de todos, no solo de los que se ven
   protected readonly total = computed(() =>
     this.withKcal().reduce((sum, i) => sum + i.kcal, 0),
   );

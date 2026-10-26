@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { FavoritesService } from '../../core/services/favorites.service';
@@ -7,32 +7,34 @@ import { RecipeCard } from '../../shared/recipe-card';
 @Component({
   selector: 'app-favorites-page',
   imports: [RouterLink, RecipeCard],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h1 class="text-2xl font-bold">Mis favoritos</h1>
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900">Mis favoritos</h1>
 
     @if (favorites.count() === 0) {
       <div
-        class="mt-6 rounded-lg border border-stone-200 bg-white p-6 text-center text-stone-600"
+        class="mt-6 rounded-xl border border-slate-200 p-10 text-center text-slate-600"
         role="status"
       >
-        <p>Aún no guardas recetas.</p>
+        <p class="font-medium text-slate-900">Todavía no guardas recetas.</p>
+        <p class="mt-1 text-sm">Pulsa «Guardar» en cualquier receta y la verás aquí.</p>
         <a
           routerLink="/"
-          class="mt-2 inline-block font-medium text-amber-700 hover:underline"
+          class="mt-5 inline-block rounded-lg bg-blue-600 px-5 py-2.5 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
         >
           Buscar recetas por ingredientes
         </a>
       </div>
     } @else {
-      <div class="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-        <p class="text-sm text-stone-500">
+      <div class="mt-2 flex flex-wrap items-baseline justify-between gap-2">
+        <p class="text-sm text-slate-500">
           {{ favorites.count() }}
           {{ favorites.count() === 1 ? 'receta guardada' : 'recetas guardadas' }}
           en este navegador.
         </p>
         <button
           type="button"
-          class="text-sm font-medium text-stone-500 hover:text-red-700 hover:underline"
+          class="text-sm font-medium text-slate-500 hover:text-red-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
           (click)="confirmClear()"
         >
           Vaciar favoritos
@@ -40,7 +42,7 @@ import { RecipeCard } from '../../shared/recipe-card';
       </div>
 
       <ul
-        class="mt-4 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3"
+        class="mt-5 grid list-none gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3"
         aria-label="Recetas favoritas"
       >
         @for (item of favorites.items(); track item.id) {

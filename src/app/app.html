@@ -1,30 +1,51 @@
-<header class="border-b border-stone-200 bg-white">
-  <nav class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3" aria-label="Principal">
-    <a routerLink="/" class="text-lg font-semibold text-amber-700">🍳 Recetario por ingredientes</a>
-    <div class="flex items-center gap-4 text-sm font-medium">
-      <a
-        routerLink="/"
-        routerLinkActive="text-amber-700"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="hover:text-amber-700"
-      >
-        Buscar
-      </a>
-      <a routerLink="/favoritos" routerLinkActive="text-amber-700" class="flex items-center gap-1 hover:text-amber-700">
-        Favoritos
-        @if (favorites.count() > 0) {
-          <span class="rounded-full bg-amber-100 px-2 text-xs text-amber-800">{{ favorites.count() }}</span>
-        }
-      </a>
-    </div>
-  </nav>
-</header>
+<div class="min-h-screen bg-white text-slate-800">
+  <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <nav class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3" aria-label="Principal">
+      <a routerLink="/" class="text-lg font-bold tracking-tight text-blue-700">Recetario</a>
 
-<main class="mx-auto max-w-5xl px-4 py-6">
-  <router-outlet />
-</main>
+      <div class="flex items-center gap-6 text-sm font-medium">
+        <a
+          routerLink="/"
+          routerLinkActive="!border-blue-600 !text-blue-700"
+          ariaCurrentWhenActive="page"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="border-b-2 border-transparent py-1 text-slate-600 transition hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+        >
+          Buscar
+        </a>
+        <a
+          routerLink="/favoritos"
+          routerLinkActive="!border-blue-600 !text-blue-700"
+          ariaCurrentWhenActive="page"
+          class="flex items-center border-b-2 border-transparent py-1 text-slate-600 transition hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+        >
+          Favoritos
+          @if (favorites.count() > 0) {
+            <span
+              class="ml-1.5 rounded bg-blue-600 px-1.5 py-0.5 text-xs font-semibold leading-none text-white"
+              [attr.aria-label]="favorites.count() + ' guardadas'"
+              >{{ favorites.count() }}</span
+            >
+          }
+        </a>
+      </div>
+    </nav>
+  </header>
 
-<footer class="mx-auto max-w-5xl px-4 pb-8 text-xs text-stone-500">
-  Recetas de <a href="https://www.themealdb.com" target="_blank" rel="noopener noreferrer" class="underline">TheMealDB</a>.
-  Las calorías son una estimación aproximada con una tabla base de ingredientes; no sustituyen información nutricional real.
-</footer>
+  <main class="mx-auto max-w-5xl px-4 py-10">
+    <router-outlet />
+  </main>
+
+  <footer class="mx-auto max-w-5xl border-t border-slate-200 px-4 py-6 text-xs leading-relaxed text-slate-500">
+    Recetas de
+    <a
+      href="https://www.themealdb.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="underline hover:text-blue-700"
+      >TheMealDB</a
+    >.
+    Las calorías son una estimación aproximada a partir de una tabla de ingredientes; no sustituyen
+    información nutricional real.
+  </footer>
+</div>

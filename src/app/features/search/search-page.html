@@ -1,12 +1,16 @@
 <section aria-labelledby="search-title">
-  <h1 id="search-title" class="text-2xl font-bold">¿Qué tienes en la cocina?</h1>
-  <p class="mt-1 text-stone-600">
-    Agrega entre {{ min }} y {{ max }} ingredientes y te muestro recetas con una estimación
-    de calorías.
-    <span class="text-stone-500">Los ingredientes van en inglés (chicken, rice, onion...).</span>
+  <h1 id="search-title" class="text-3xl font-bold tracking-tight text-slate-900">
+    ¿Qué tienes en la cocina?
+  </h1>
+  <p class="mt-2 max-w-2xl text-slate-600">
+    Elige entre {{ min }} y {{ max }} ingredientes y te muestro recetas con una estimación de
+    calorías.
+  </p>
+  <p class="mt-1 text-sm text-slate-500">
+    Si escribes tus propios ingredientes, hazlo en inglés (chicken, rice, onion...).
   </p>
 
-  <form class="mt-4 flex gap-2" (submit)="$event.preventDefault(); add(ingredientInput)">
+  <form class="mt-6 flex gap-2" (submit)="$event.preventDefault(); add(ingredientInput)">
     <label for="ingredient" class="sr-only">Ingrediente</label>
     <input
       #ingredientInput
@@ -15,7 +19,7 @@
       list="ingredient-options"
       autocomplete="off"
       placeholder="Ej. chicken"
-      class="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/30"
+      class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
       [attr.aria-invalid]="inputError() ? 'true' : null"
       [attr.aria-describedby]="inputError() ? 'ingredient-error' : null"
       (input)="inputError.set(null)"
@@ -27,7 +31,7 @@
     </datalist>
     <button
       type="submit"
-      class="rounded-lg border border-amber-600 px-4 py-2 font-medium text-amber-700 hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+      class="rounded-lg border border-blue-600 px-5 py-2.5 font-medium text-blue-700 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-transparent"
       [disabled]="state.ingredients().length >= max"
     >
       Agregar
@@ -35,84 +39,110 @@
   </form>
 
   @if (inputError(); as error) {
-    <p id="ingredient-error" role="alert" class="mt-2 text-sm text-rose-700">{{ error }}</p>
+    <p id="ingredient-error" role="alert" class="mt-2 text-sm text-red-700">{{ error }}</p>
   }
 
-  @if (state.ingredients().length > 0) {
-    <ul class="mt-4 flex flex-wrap gap-2" aria-label="Ingredientes elegidos">
-      @for (name of state.ingredients(); track name) {
-        <li
-          class="flex items-center gap-1 rounded-full bg-amber-100 py-1 pl-3 pr-1 text-sm capitalize text-amber-900"
-        >
-          {{ name }}
+  <div class="mt-6">
+    <p class="text-sm font-medium text-slate-700">Ingredientes comunes</p>
+    <ul class="mt-2 flex list-none flex-wrap gap-2 p-0" aria-label="Ingredientes comunes">
+      @for (pick of quickPicks; track pick.value) {
+        <li>
           <button
             type="button"
-            class="flex h-6 w-6 items-center justify-center rounded-full hover:bg-amber-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
-            [attr.aria-label]="'Quitar ' + name"
-            (click)="state.remove(name)"
+            class="rounded-md border px-3 py-1.5 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            [class]="
+              chosen().has(pick.value)
+                ? 'border-blue-600 bg-blue-600 font-medium text-white'
+                : 'border-slate-300 bg-white text-slate-700 hover:border-blue-500 hover:text-blue-700'
+            "
+            [attr.aria-pressed]="chosen().has(pick.value)"
+            (click)="togglePick(pick)"
           >
-            <span aria-hidden="true">×</span>
+            {{ pick.label }}
           </button>
         </li>
       }
     </ul>
-  }
+  </div>
 
-  <div class="mt-4 flex flex-wrap items-center gap-3">
+  <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div class="flex items-center justify-between gap-2 text-sm">
+      <h2 class="font-semibold text-slate-800">Tu lista</h2>
+      <span class="tabular-nums text-slate-500" aria-live="polite">
+        {{ state.ingredients().length }} de {{ max }}
+      </span>
+    </div>
+
+    @if (state.ingredients().length > 0) {
+      <ul class="mt-3 flex list-none flex-wrap gap-2 p-0" aria-label="Ingredientes elegidos">
+        @for (name of state.ingredients(); track name) {
+          <li
+            class="flex items-center gap-2 rounded-md border border-blue-200 bg-white py-1 pl-3 pr-2 text-sm capitalize text-blue-900"
+          >
+            {{ displayName(name) }}
+            <button
+              type="button"
+              class="text-xs normal-case text-slate-500 underline hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+              [attr.aria-label]="'Quitar ' + name"
+              (click)="state.remove(name)"
+            >
+              quitar
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="mt-2 text-sm text-slate-500">Todavía no has agregado ingredientes.</p>
+    }
+  </div>
+
+  <div class="mt-5 flex flex-wrap items-center gap-4">
     <button
       type="button"
-      class="rounded-lg bg-amber-600 px-5 py-2 font-semibold text-white hover:bg-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-stone-300"
+      class="rounded-lg bg-blue-600 px-6 py-2.5 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300"
       [disabled]="!state.canSearch() || state.status() === 'loading'"
       (click)="state.search()"
     >
-      {{ state.status() === 'loading' ? 'Buscando…' : 'Buscar recetas' }}
+      {{ state.status() === 'loading' ? 'Buscando...' : 'Buscar recetas' }}
     </button>
 
     @if (state.ingredients().length > 0) {
       <button
         type="button"
-        class="text-sm text-stone-500 hover:text-stone-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+        class="text-sm text-slate-500 hover:text-slate-800 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
         (click)="state.clearIngredients()"
       >
-        Limpiar
+        Limpiar lista
       </button>
     }
   </div>
 
-  @if (!state.canSearch() && state.ingredients().length < min) {
-    <p class="mt-2 text-sm text-stone-500" role="status">
-      Faltan {{ min - state.ingredients().length }}
-      {{ min - state.ingredients().length === 1 ? 'ingrediente' : 'ingredientes' }}
-      para poder buscar.
-    </p>
+  @if (missingLabel(); as label) {
+    <p class="mt-2 text-sm text-slate-500" role="status">{{ label }}</p>
   }
 
   @if (state.status() === 'done' && state.isStale()) {
-    <p class="mt-2 text-sm text-amber-700" role="status">
+    <p class="mt-2 text-sm text-blue-700" role="status">
       Cambiaste los ingredientes. Pulsa «Buscar recetas» para actualizar los resultados.
     </p>
   }
 </section>
 
-<section
-  class="mt-8"
-  aria-live="polite"
-  [attr.aria-busy]="state.status() === 'loading'"
->
+<section class="mt-10" aria-live="polite" [attr.aria-busy]="state.status() === 'loading'">
   @switch (state.status()) {
     @case ('loading') {
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         @for (n of skeletons; track n) {
-          <div class="h-64 animate-pulse rounded-xl bg-stone-200"></div>
+          <div class="h-64 animate-pulse rounded-xl bg-slate-100"></div>
         }
       </div>
     }
     @case ('error') {
-      <div role="alert" class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-800">
+      <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-5 text-red-800">
         <p>No pude conectar con TheMealDB. Revisa tu conexión e inténtalo de nuevo.</p>
         <button
           type="button"
-          class="mt-2 text-sm font-medium text-rose-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
+          class="mt-3 rounded-lg border border-red-300 bg-white px-4 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
           (click)="state.search()"
         >
           Reintentar
@@ -123,42 +153,53 @@
       @if (state.results().length === 0) {
         <div
           role="status"
-          class="rounded-lg border border-stone-200 bg-white p-6 text-center text-stone-600"
+          class="rounded-xl border border-slate-200 p-8 text-center text-slate-600"
         >
           No encontré recetas con esos ingredientes. Prueba con menos ingredientes o con otros
           nombres en inglés.
         </div>
       } @else {
-        <h2 class="mb-3 text-lg font-semibold">
+        <h2 class="mb-4 text-xl font-semibold text-slate-900">
           {{ state.results().length }}
           {{ state.results().length === 1 ? 'receta encontrada' : 'recetas encontradas' }}
         </h2>
-        <ul class="grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3" aria-label="Resultados de búsqueda">
+        <ul
+          class="grid list-none gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3"
+          aria-label="Resultados de búsqueda"
+        >
           @for (item of state.results(); track item.id) {
             <li>
               <app-recipe-card [recipe]="item">
-                <p class="font-medium text-stone-800">
-                  Coincide con {{ item.matches.length }} de {{ state.searchedWith().length }}
-                  {{ state.searchedWith().length === 1 ? 'ingrediente' : 'ingredientes' }}
+                <p>
+                  <span
+                    class="rounded px-2 py-0.5 text-xs font-medium"
+                    [class]="
+                      item.matches.length === state.searchedWith().length
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-700'
+                    "
+                  >
+                    Coincide con {{ item.matches.length }} de {{ state.searchedWith().length }}
+                  </span>
                 </p>
                 @switch (item.detail) {
                   @case ('loading') {
-                    <p class="mt-1 text-stone-500">Calculando calorías…</p>
+                    <p class="mt-2 text-slate-500">Calculando calorías...</p>
                   }
                   @case ('ready') {
-                    <p class="mt-1">
-                      ≈
-                      <strong class="tabular-nums">{{ item.estimate!.totalKcal }} kcal</strong>
+                    <p class="mt-2">
+                      Aprox.
+                      <strong class="tabular-nums text-slate-900">{{ item.estimate!.totalKcal }} kcal</strong>
                       en total
                     </p>
                     @if (item.estimate!.coverage < 0.6) {
-                      <p class="text-xs text-amber-700">
+                      <p class="text-xs text-slate-500">
                         Estimación parcial: faltan datos de varios ingredientes.
                       </p>
                     }
                   }
                   @case ('error') {
-                    <p class="mt-1 text-stone-500">No se pudo estimar las calorías.</p>
+                    <p class="mt-2 text-slate-500">No se pudieron estimar las calorías.</p>
                   }
                 }
               </app-recipe-card>
